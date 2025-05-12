@@ -1,4 +1,4 @@
-.
+..
 ## 🚀 Como Iniciar o Projeto FCG
 
 ### ✅ Pré-requisitos
