@@ -1,0 +1,68 @@
+## Compilação
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+[Ll]ogs/
+
+## Arquivos de usuário do Visual Studio
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Configurações locais
+.vscode/
+*.code-workspace
+*.vs/
+
+## Arquivos de log e temporários
+*.log
+*.tlog
+*.tmp
+*.bak
+*.old
+*.orig
+
+## Arquivos do Rider
+.idea/
+*.sln.iml
+
+## Cache e artefatos
+*.cache
+*.dbmdl
+*.db
+*.pdb
+*.mdb
+
+## Diretórios de publicação
+publish/
+out/
+
+## Arquivos de pacote
+*.nupkg
+*.snupkg
+
+## Arquivos de teste e cobertura
+TestResults/
+*.coverage
+*.coveragexml
+*.trx
+*.vspx
+*.vsp
+*.vspscc
+
+## Ferramentas de análise
+.stylecop
+.ReSharper*/
+resharper.xml
+*.DotSettings.user
+
+## Git
+*.orig
+
+## Sistema operacional
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
