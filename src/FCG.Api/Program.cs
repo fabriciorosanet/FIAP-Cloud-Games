@@ -1,41 +1,45 @@
-var builder = WebApplication.CreateBuilder(args);
+using CorrelationId;
+using CorrelationId.Abstractions;
+using CorrelationId.DependencyInjection;
+using FCG.Api.Configurations;
+using FCG.Api.Configurations.Serilog;
+using FCG.Api.Configurations.Swagger;
+using FCG.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddInfrastructure(builder.Configuration);
+LoggingConfiguration.ConfigureLogging(builder);
+builder.Services.AddDefaultCorrelationId(options =>
+{
+	options.AddToLoggingScope = true;
+	options.UpdateTraceIdentifier = true;
+});
+
+builder.Services.AddEndpointsApiExplorer();                                    
+builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerServices();
+builder.Services.AddApplicationServices();
+
+// Adicionar serviços ao container
+// builder.Services.AddOpenApi();
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+	var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+	db.Database.Migrate();
+	DataSeeder.Seed(db);
+}
 
-// Configure the HTTP request pipeline.
+// Configurar o pipeline de requisição HTTP
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+	app.UseSwaggerSetup();
 }
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.UseCorrelationId(); // Certifique-se de que o middleware de CorrelationId é chamado aqui
+app.EndpointsMap(); 
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
