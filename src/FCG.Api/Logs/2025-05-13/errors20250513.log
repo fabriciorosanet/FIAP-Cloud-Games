@@ -1,0 +1,9 @@
+[19:08:36 ERR] () Failed executing DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Usuarios] (
+    [Id] uniqueidentifier NOT NULL,
+    [Nome] nvarchar(255) NOT NULL,
+    [Email] nvarchar(150) NOT NULL,
+    [Senha] nvarchar(255) NOT NULL,
+    [TipoUsuario] int NOT NULL DEFAULT 2,
+    CONSTRAINT [PK_Usuarios] PRIMARY KEY ([Id])
+);
