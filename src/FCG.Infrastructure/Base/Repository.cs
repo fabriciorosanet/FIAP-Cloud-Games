@@ -1,13 +1,26 @@
 using System.Linq.Expressions;
+using FCG.Infrastructure;
 using FCP.Domain.Base;
+using Microsoft.EntityFrameworkCore;
 
 namespace FCP.Infrastructure.Base;
 
-public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : Entity, new()
+public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : Entity
 {
-    public Task Adicionar(TEntity entity)
+    protected readonly AppDbContext Db;
+    protected readonly DbSet<TEntity> DbSet;
+
+    public Repository(AppDbContext db)
     {
-        throw new NotImplementedException();
+        Db = db;
+        DbSet = db.Set<TEntity>();
+    }
+
+    public async Task<TEntity> Adicionar(TEntity entity)
+    {
+        var addedEntity = DbSet.Add(entity).Entity;
+        await SaveChanges();
+        return addedEntity;
     }
 
     public Task Atualizar(TEntity entity)
@@ -22,7 +35,7 @@ public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity :
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        Db?.Dispose();
     }
 
     public Task<TEntity> ObterPorId(Guid id)

@@ -21,8 +21,4 @@
     <ProjectReference Include="..\FCG.Infrastructure\FCG.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Areas\" />
-  </ItemGroup>
-
 </Project>

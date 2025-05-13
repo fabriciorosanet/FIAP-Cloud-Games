@@ -24,10 +24,10 @@ dotnet restore
 
 ### 🛠️ Aplicando Migrations e Criando o Banco
 
-Para aplicar as migrations e criar o banco de dados:
+Para aplicar as migrations e criar o banco de dados, acesse a pasta raiz do projeto FCG.Infrastructure:
 
 ```bash
-dotnet ef database update --project FCG.Infrastructure/FCG.Infrastructure.csproj --startup-project FCG.Api/FCG.Api.csproj
+dotnet ef migrations add CreateUsuarios --project .\FCG.Infrastructure.csproj --startup-project ..\FCG.Api\FCG.Api.csproj
 ```
 
 > 🟨 **Atenção**:
@@ -41,10 +41,10 @@ dotnet ef database update --project "G:\\FIAP\\FCG\\src\\FCG.Infrastructure\\FCG
 
 ### 🧱 Gerando Migrations
 
-Para gerar uma nova migration do Entity Framework:
+Para gerar uma nova migration do Entity Framework, , acesse a pasta raiz do projeto FCG.Infrastructure:
 
 ```bash
-dotnet ef migrations add NomeDaMigration --project FCG.Infrastructure/FCG.Infrastructure.csproj --startup-project FCG.Api/FCG.Api.csproj
+dotnet ef migrations add NomeDaMigration --project .\FCG.Infrastructure.csproj --startup-project ..\FCG.Api\FCG.Api.csproj
 ```
 
 > ❗ Se houver erro de caminho, use os caminhos absolutos da mesma forma mostrada acima.

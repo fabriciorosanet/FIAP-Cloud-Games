@@ -1,4 +1,5 @@
-﻿using FCG.Api.Areas.Weatherforecast.Endpoints;
+﻿using FCG.Api.Areas.Usuarios.Endpoints;
+using FCG.Api.Areas.Weatherforecast.Endpoints;
 
 namespace FCG.Api.Configurations {
 
@@ -8,8 +9,8 @@ namespace FCG.Api.Configurations {
 		{
 			// Mapeia os endpoints
 			WeatherForecastEndpointsMapper.Map(routes);
+			UsuarioEndpointsMapper.Map(routes);
 		}
-
 	}
 
 }
