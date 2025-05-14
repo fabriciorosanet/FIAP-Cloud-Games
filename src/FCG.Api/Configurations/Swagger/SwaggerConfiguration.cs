@@ -15,6 +15,30 @@ namespace FCG.Api.Configurations.Swagger {
 				var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"; // Usando o nome do assembly
 				var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 				c.IncludeXmlComments(xmlPath); // Inclua comentários XML se necessário
+				c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+				{
+					Description = "JWT no padrão **Bearer {token}**",
+					Name = "Authorization",
+					In = ParameterLocation.Header,
+					Type = SecuritySchemeType.Http,
+					Scheme = "Bearer",
+					BearerFormat = "JWT",
+				});
+				
+				c.AddSecurityRequirement(new OpenApiSecurityRequirement
+				{
+					{
+						new  OpenApiSecurityScheme
+						{
+							Reference = new OpenApiReference
+							{
+								Id = "Bearer",
+								Type = ReferenceType.SecurityScheme
+							}	
+						},
+						Array.Empty<string>()
+					}
+				});
 			});
 		}
 

@@ -14,6 +14,12 @@ public class UsuarioService : IUsuarioService
         _usuarioRepository = usuarioRepository;
     }
 
+    public async Task<Usuario?> AutenticarUsuarioAsync(string email, string senha)
+    {
+        var usuario = await _usuarioRepository.ObterPorEmailAsync(email);
+        return (usuario is not null && usuario.Senha == senha) ?  usuario : null;
+    }
+
     public async Task<DadosUsuarioViewModel> Adicionar(UsuarioViewModel usuario)
     {
         var usuarioAdicionado = await _usuarioRepository.Adicionar(new Usuario
