@@ -53,8 +53,8 @@ public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity :
         throw new NotImplementedException();
     }
 
-    public Task<int> SaveChanges()
+    public async Task<int> SaveChanges()
     {
-        throw new NotImplementedException();
+        return await Db.SaveChangesAsync();
     }
 }
