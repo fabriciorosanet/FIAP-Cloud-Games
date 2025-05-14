@@ -33,6 +33,42 @@ public class UsuarioService : IUsuarioService
         };
     }
 
+    public async Task<bool> Excluir(Guid usuarioId)
+    {
+        var usuarioExistente = await _usuarioRepository.ObterPorId(usuarioId);
+        if (usuarioExistente == null)
+        {
+            return false;
+        }
+
+        await _usuarioRepository.Remover(usuarioId);
+        return true;
+    }
+
+    public async Task<DadosUsuarioViewModel> Atualizar(UsuarioViewModel usuario)
+    {
+        var usuarioExistente = await _usuarioRepository.ObterPorId(usuario.Id);
+        if (usuarioExistente == null)
+        {
+            return null;
+        }
+
+        usuarioExistente.Nome = usuario.Nome;
+        usuarioExistente.Email = usuario.Email;
+        usuarioExistente.Senha = usuario.Senha;
+        usuarioExistente.TipoUsuario = (TipoUsuario)usuario.TipoUsuario;
+
+        await _usuarioRepository.Atualizar(usuarioExistente);
+
+        return new DadosUsuarioViewModel
+        {
+            Id = usuarioExistente.Id,
+            Nome = usuarioExistente.Nome,
+            Email = usuarioExistente.Email,
+            TipoUsuario = (TipoUsuarioViewModel)usuarioExistente.TipoUsuario
+        };
+    }
+
     public void Dispose()
     {
         _usuarioRepository?.Dispose();
