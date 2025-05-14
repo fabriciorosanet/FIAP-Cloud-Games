@@ -6,5 +6,6 @@ public interface IUsuarioService : IDisposable
 {
     Task<DadosUsuarioViewModel> Adicionar(UsuarioViewModel usuario);
     Task<bool> Excluir(Guid usuarioId);
-    Task<DadosUsuarioViewModel> Atualizar(UsuarioViewModel usuario); 
+    Task<DadosUsuarioViewModel> Atualizar(UsuarioViewModel usuario);
+    Task<List<DadosUsuarioViewModel>> Consultar();
 }

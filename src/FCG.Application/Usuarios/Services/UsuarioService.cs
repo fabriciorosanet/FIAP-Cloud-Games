@@ -73,4 +73,21 @@ public class UsuarioService : IUsuarioService
     {
         _usuarioRepository?.Dispose();
     }
+
+    public async Task<List<DadosUsuarioViewModel>> Consultar()
+    {
+        var listaUsuario = await _usuarioRepository.ObterTodos();
+        if (listaUsuario == null || !listaUsuario.Any())
+        {
+            return null;
+        }
+
+        return listaUsuario.Select(usuario => new DadosUsuarioViewModel
+        {
+            Id = usuario.Id,
+            Nome = usuario.Nome,
+            Email = usuario.Email,
+            TipoUsuario = (TipoUsuarioViewModel)usuario.TipoUsuario
+        }).ToList();
+    }
 }
