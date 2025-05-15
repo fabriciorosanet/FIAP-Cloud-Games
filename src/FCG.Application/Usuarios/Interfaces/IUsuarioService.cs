@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using FCG.Application.Usuarios.ViewModels;
 using FCG.Domain.Usuarios.Entities;
 
@@ -10,4 +11,5 @@ public interface IUsuarioService : IDisposable
     Task<bool> Excluir(Guid usuarioId);
     Task<DadosUsuarioViewModel> Atualizar(UsuarioViewModel usuario);
     Task<List<DadosUsuarioViewModel>> Consultar();
+    Task<Usuario?> ObterUsuario(Expression<Func<Usuario, bool>> predicate);
 }

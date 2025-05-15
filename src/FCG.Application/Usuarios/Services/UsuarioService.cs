@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using FCG.Application.Usuarios.Interfaces;
 using FCG.Application.Usuarios.ViewModels;
 using FCG.Domain.Usuarios.Entities;
@@ -95,5 +96,14 @@ public class UsuarioService : IUsuarioService
             Email = usuario.Email,
             TipoUsuario = (TipoUsuarioViewModel)usuario.TipoUsuario
         }).ToList();
+    }
+
+    public async Task<Usuario?> ObterUsuario(Expression<Func<Usuario, bool>> predicate)
+    {
+        var usuarios = await _usuarioRepository.Buscar(predicate);
+        
+        if (usuarios == null || !usuarios.Any())  return null;
+        
+        return usuarios.ToList().FirstOrDefault();
     }
 }

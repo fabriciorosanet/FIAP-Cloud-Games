@@ -47,6 +47,12 @@ public static class UsuarioEndpoints
                 return Results.BadRequest(validationResults);
             }
 
+            if(service.ObterUsuario(u => u.Email == novoUsuario.Email) != null)
+            {
+                logger.LogWarning("Usuário com o email {Email} já cadastrado.", novoUsuario.Email);
+                return Results.Conflict($"Usuário com o email {novoUsuario.Email} já cadastrado.");
+            }
+
             try
             {
                 var usuario = await service.Adicionar(novoUsuario);
