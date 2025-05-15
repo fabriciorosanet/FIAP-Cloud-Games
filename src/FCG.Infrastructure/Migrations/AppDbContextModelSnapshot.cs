@@ -55,26 +55,6 @@ namespace FCG.Infrastructure.Migrations
 
                     b.ToTable("Usuarios", (string)null);
                 });
-
-            modelBuilder.Entity("FCG.Domain.WeatherForecast.Entities.WeatherForecastEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Summary")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TemperatureC")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WeatherForecasts");
-                });
 #pragma warning restore 612, 618
         }
     }

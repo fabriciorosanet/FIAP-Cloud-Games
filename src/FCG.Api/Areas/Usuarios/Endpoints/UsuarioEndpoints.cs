@@ -9,6 +9,31 @@ public static class UsuarioEndpoints
 {
     public static void MapUsuarioEndpoints(this IEndpointRouteBuilder routes)
     {
+        routes.MapGet("/usuario/consultar", async (IUsuarioService service, ILoggerFactory loggerFactory) =>
+        {
+            var logger = loggerFactory.CreateLogger("UsuarioEndpoint");
+            logger.LogInformation("Requisição recebida para /usuario/consultar");
+
+            try
+            {
+                var listaUsuario = await service.Consultar();
+                if (listaUsuario == null)
+                {
+                    logger.LogWarning("Nenhum usuário cadastrado");
+                    return Results.NotFound($"Nenhum usuário cadastrado");
+                }
+
+                return Results.Ok(listaUsuario);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro ao consultar os usuários.");
+                return Results.Problem("Erro ao consultar os usuários.");
+            }
+        })
+        .WithName("ConsultarUsuarios")
+        .WithSummary("Consultar usuarios");
+
         routes.MapPost("/usuario/adicionar", async (IUsuarioService service, ILoggerFactory loggerFactory, [FromBody] UsuarioViewModel novoUsuario) =>
         {
             var logger = loggerFactory.CreateLogger("UsuarioEndpoint");
@@ -69,33 +94,6 @@ public static class UsuarioEndpoints
         })
         .WithName("AtualizarUsuario")
         .WithSummary("Atualiza um usuário existente no sistema");
-
-        routes.MapGet("/usuario/consultar", async (IUsuarioService service, ILoggerFactory loggerFactory) =>
-        {
-            var logger = loggerFactory.CreateLogger("UsuarioEndpoint");
-            logger.LogInformation("Requisição recebida para /usuario/consultar");
-            
-            try
-            {
-                var listaUsuario = await service.Consultar();
-                if (listaUsuario == null)
-                {
-                    logger.LogWarning("Nenhum usuário cadastrado");
-                    return Results.NotFound($"Nenhum usuário cadastrado");
-                }
-
-                return Results.Ok(listaUsuario);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Erro ao consultar os usuários.");
-                return Results.Problem("Erro ao consultar os usuários.");
-            }
-        })
-        .WithName("ConsultarUsuarios")
-        .WithSummary("Consultar usuarios");
-
-
 
         routes.MapDelete("/usuario/excluir/{id:guid}", async (IUsuarioService service, ILoggerFactory loggerFactory, Guid id) =>
         {
