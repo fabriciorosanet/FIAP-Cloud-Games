@@ -9,7 +9,7 @@ namespace FCG.Api.Configurations {
 		{
 			// Mapeia os endpoints
 			UsuarioEndpointsMapper.Map(routes);
-			AuthEndpoints.MapAuth(routes);
+			AuthEndpointsMapper.Map(routes);
 		}
 	}
 

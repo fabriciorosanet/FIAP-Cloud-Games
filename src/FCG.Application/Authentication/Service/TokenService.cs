@@ -20,7 +20,7 @@ public sealed class TokenService : ITokenService
         var creds   = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expires = DateTime.UtcNow.AddMinutes(_settings.ExpiresInMinutes);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, usuario.Email),

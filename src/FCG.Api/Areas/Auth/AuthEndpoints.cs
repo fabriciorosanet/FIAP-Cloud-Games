@@ -5,14 +5,14 @@ namespace FCG.Api.Areas.Auth;
 
 public static class AuthEndpoints
 {
-    public static void MapAuth(this IEndpointRouteBuilder routes)
+    public static void MapAuthEndpoints(this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("/api/auth").WithTags("Auth");
 
         group.MapPost("/login", async (
             LoginRequest req,
             IUsuarioService usuarioSvc,
-            ITokenService  tokenSvc,
+            ITokenService tokenSvc,
             CancellationToken ct) =>
         {
             var usuario = await usuarioSvc.AutenticarUsuarioAsync(req.Email, req.Password);
@@ -20,7 +20,9 @@ public static class AuthEndpoints
 
             var (token, exp) = tokenSvc.GenerateToken(usuario);
             return Results.Ok(new { access_token = token, expires_at = exp });
-        }).AllowAnonymous();
+        })
+        .AllowAnonymous()
+        .WithSummary("Autenticacao");
     }
 }
 

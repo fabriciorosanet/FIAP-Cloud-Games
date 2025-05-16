@@ -31,6 +31,7 @@ public static class UsuarioEndpoints
                 return Results.Problem("Erro ao consultar os usuários.");
             }
         })
+        .RequireAuthorization("Admin")
         .WithName("ConsultarUsuarios")
         .WithSummary("Consultar usuarios");
 
@@ -65,6 +66,7 @@ public static class UsuarioEndpoints
             }
 
         })
+        .RequireAuthorization("Admin")
         .WithName("AdicionarUsuario")
         .WithSummary("Adiciona um novo usuário ao sistema");
 
@@ -98,6 +100,7 @@ public static class UsuarioEndpoints
                 return Results.Problem("Erro interno ao atualizar o usuário.");
             }
         })
+        .RequireAuthorization("Admin")   
         .WithName("AtualizarUsuario")
         .WithSummary("Atualiza um usuário existente no sistema");
 
@@ -123,6 +126,7 @@ public static class UsuarioEndpoints
                 return Results.Problem("Erro interno ao excluir o usuário.");
             }
         })
+        .RequireAuthorization("Admin")
         .WithName("ExcluirUsuario")
         .WithSummary("Exclui um usuário existente no sistema");
 
