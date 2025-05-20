@@ -1,5 +1,4 @@
 ﻿using FCG.Domain.Usuarios.Entities;
-using FCG.Domain.WeatherForecast.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace FCG.Infrastructure {
@@ -9,7 +8,6 @@ namespace FCG.Infrastructure {
 		public AppDbContext(DbContextOptions<AppDbContext> options)
 			: base(options) { }
 
-		public DbSet<WeatherForecastEntity> WeatherForecasts => Set<WeatherForecastEntity>();
 		public DbSet<Usuario> Usuarios => Set<Usuario>();
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

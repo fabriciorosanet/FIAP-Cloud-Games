@@ -11,6 +11,32 @@ public static class UsuarioEndpoints
 {
     public static void MapUsuarioEndpoints(this IEndpointRouteBuilder routes)
     {
+        routes.MapGet("/usuario/consultar", async (IUsuarioService service, ILoggerFactory loggerFactory) =>
+        {
+            var logger = loggerFactory.CreateLogger("UsuarioEndpoint");
+            logger.LogInformation("Requisição recebida para /usuario/consultar");
+
+            try
+            {
+                var listaUsuario = await service.Consultar();
+                if (listaUsuario == null)
+                {
+                    logger.LogWarning("Nenhum usuário cadastrado");
+                    return Results.NotFound($"Nenhum usuário cadastrado");
+                }
+
+                return Results.Ok(listaUsuario);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro ao consultar os usuários.");
+                return Results.Problem("Erro ao consultar os usuários.");
+            }
+        })
+        .RequireAuthorization("Admin")
+        .WithName("ConsultarUsuarios")
+        .WithSummary("Consultar usuarios");
+
         routes.MapPost("/usuario/adicionar", async (IUsuarioService service, ILoggerFactory loggerFactory, [FromBody] UsuarioViewModel novoUsuario) =>
         {
             var logger = loggerFactory.CreateLogger("UsuarioEndpoint");
@@ -22,6 +48,12 @@ public static class UsuarioEndpoints
             {
                 logger.LogWarning("Modelo inválido: {@ValidationErrors}", validationResults);
                 return Results.BadRequest(validationResults);
+            }
+
+            if(service.ObterUsuario(u => u.Email == novoUsuario.Email) != null)
+            {
+                logger.LogWarning("Usuário com o email {Email} já cadastrado.", novoUsuario.Email);
+                return Results.Conflict($"Usuário com o email {novoUsuario.Email} já cadastrado.");
             }
 
             try
@@ -36,6 +68,7 @@ public static class UsuarioEndpoints
             }
 
         })
+        .RequireAuthorization("Admin")
         .WithName("AdicionarUsuario")
         .WithSummary("Adiciona um novo usuário ao sistema");
 
@@ -69,64 +102,36 @@ public static class UsuarioEndpoints
                 return Results.Problem("Erro interno ao atualizar o usuário.");
             }
         })
+        .RequireAuthorization("Admin")   
         .WithName("AtualizarUsuario")
         .WithSummary("Atualiza um usuário existente no sistema");
 
-        routes.MapGet("/usuario/consultar", async (IUsuarioService service, ILoggerFactory loggerFactory, Guid? id) =>
+        routes.MapGet("/usuario/consultar", async (IUsuarioService service, ILoggerFactory loggerFactory) =>
         {
-
             var logger = loggerFactory.CreateLogger("UsuarioEndpoint");
             logger.LogInformation("Requisição recebida para /usuario/consultar");
-
-            if (id.HasValue)
+            
+            try
             {
-                DadosUsuarioViewModel usuario = await service.ConsultarUsuario(id.Value);
-
-                try
+                var listaUsuario = await service.Consultar();
+                if (listaUsuario == null)
                 {
-                    if (usuario == null)
-                    {
-                        logger.LogWarning("Usuário com ID {Id} não encontrado.", id);
-                        return Results.NotFound($"Usuário com ID {id} não encontrado.");
-                    }
-                    else
-                    {
-                        logger.LogWarning("Usuário de nome: {nome} e e-mail: {email}", usuario.Nome, usuario.Email);
-                    }
-
-
-
-                    return Results.Ok($"Usuário do nome: {usuario.Nome} e do e-mail: {usuario.Email}.");
+                    logger.LogWarning("Nenhum usuário cadastrado");
+                    return Results.NotFound($"Nenhum usuário cadastrado");
                 }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Erro ao consultar o usuário com ID {Id}.", usuario.Id);
-                    return Results.Problem("Erro interno ao consultar o usuário.");
-                }
+
+                return Results.Ok(listaUsuario);
             }
-            else
+            catch (Exception ex)
             {
-                try
-                {
-                    var listaUsuario = await service.Consultar();
-                    if (listaUsuario == null)
-                    {
-                        logger.LogWarning("Nenhum usuário cadastrado");
-                        return Results.NotFound($"Nenhum usuário cadastrado");
-                    }
-
-                    return Results.Ok(listaUsuario);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Erro ao consultar os usuários.");
-                    return Results.Problem("Erro ao consultar os usuários.");
-                }
-            }      
-
+                logger.LogError(ex, "Erro ao consultar os usuários.");
+                return Results.Problem("Erro ao consultar os usuários.");
+            }
         })
-        .WithName("ConsultarUsuario")
-        .WithSummary("Consultar usuario");
+        .WithName("ConsultarUsuarios")
+        .WithSummary("Consultar usuarios");
+
+
 
         routes.MapDelete("/usuario/excluir/{id:guid}", async (IUsuarioService service, ILoggerFactory loggerFactory, Guid id) =>
         {
@@ -150,6 +155,7 @@ public static class UsuarioEndpoints
                 return Results.Problem("Erro interno ao excluir o usuário.");
             }
         })
+        .RequireAuthorization("Admin")
         .WithName("ExcluirUsuario")
         .WithSummary("Exclui um usuário existente no sistema");
 

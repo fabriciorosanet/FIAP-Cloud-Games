@@ -1,10 +1,12 @@
 using CorrelationId;
-using CorrelationId.Abstractions;
 using CorrelationId.DependencyInjection;
 using FCG.Api.Configurations;
 using FCG.Api.Configurations.Serilog;
 using FCG.Api.Configurations.Swagger;
 using FCG.Infrastructure;
+using FCG.Api.Configurations.Authentication;
+using FCG.Application.Authentication.Interface;
+using FCG.Application.Authentication.Service;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,8 +22,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerServices();
 builder.Services.AddApplicationServices();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddScoped<ITokenService, TokenService>();
 
-// Adicionar serviços ao container
+// Adicionar serviï¿½os ao container
 // builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -29,17 +33,18 @@ using (var scope = app.Services.CreateScope())
 {
 	var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 	db.Database.Migrate();
-	DataSeeder.Seed(db);
 }
 
-// Configurar o pipeline de requisição HTTP
+// Configurar o pipeline de requisiï¿½ï¿½o HTTP
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwaggerSetup();
 }
 
 app.UseHttpsRedirection();
-app.UseCorrelationId(); // Certifique-se de que o middleware de CorrelationId é chamado aqui
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseCorrelationId(); // Certifique-se de que o middleware de CorrelationId ï¿½ chamado aqui
 app.EndpointsMap(); 
 
 app.Run();
