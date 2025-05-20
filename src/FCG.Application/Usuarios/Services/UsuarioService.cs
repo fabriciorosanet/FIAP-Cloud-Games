@@ -90,4 +90,21 @@ public class UsuarioService : IUsuarioService
             TipoUsuario = (TipoUsuarioViewModel)usuario.TipoUsuario
         }).ToList();
     }
+
+    public async Task<DadosUsuarioViewModel> ConsultarUsuario(Guid usuarioId)
+    {
+        var usuarioExistente = await _usuarioRepository.ObterPorId(usuarioId);
+        if (usuarioExistente == null)
+        {
+            return null;
+        }
+
+        return new DadosUsuarioViewModel
+        {
+            Id = usuarioExistente.Id,
+            Nome = usuarioExistente.Nome,
+            Email = usuarioExistente.Email,
+            TipoUsuario = (TipoUsuarioViewModel)usuarioExistente.TipoUsuario
+        };
+    }
 }
