@@ -11,6 +11,6 @@ public interface IUsuarioService : IDisposable
     Task<bool> Excluir(Guid usuarioId);
     Task<DadosUsuarioViewModel> Atualizar(UsuarioViewModel usuario);
     Task<List<DadosUsuarioViewModel>> Consultar();
-    Task<Usuario?> ObterUsuario(Expression<Func<Usuario, bool>> predicate);
     Task<DadosUsuarioViewModel> ConsultarUsuario(Guid usuarioId);
+    Task<Usuario?> ObterUsuario(Expression<Func<Usuario, bool>> predicate);
 }
