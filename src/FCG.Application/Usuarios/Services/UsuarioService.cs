@@ -98,6 +98,23 @@ public class UsuarioService : IUsuarioService
         }).ToList();
     }
 
+    public async Task<DadosUsuarioViewModel> ConsultarUsuario(Guid usuarioId)
+    {
+        var usuarioExistente = await _usuarioRepository.ObterPorId(usuarioId);
+        if (usuarioExistente == null)
+        {
+            return null;
+        }
+
+        return new DadosUsuarioViewModel
+        {
+            Id = usuarioExistente.Id,
+            Nome = usuarioExistente.Nome,
+            Email = usuarioExistente.Email,
+            TipoUsuario = (TipoUsuarioViewModel)usuarioExistente.TipoUsuario
+        };
+    }
+
     public async Task<Usuario?> ObterUsuario(Expression<Func<Usuario, bool>> predicate)
     {
         var usuarios = await _usuarioRepository.Buscar(predicate);
