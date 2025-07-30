@@ -1,0 +1,54 @@
+
+#  migrations:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.migrations
+#    container_name: fcg-migrations
+#    depends_on:
+#      sqlserver:
+#        condition: service_completed_successfully
+#    environment:
+#      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=FCG;User ID=sa;Password=Sql@1234;TrustServerCertificate=True;
+#    networks:
+#      - fcg-network
+
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver-fcg
+    environment:
+      ACCEPT_EULA: 'Y'
+      SA_PASSWORD: 'Sql@1234'
+      MSSQL_PID: 'Developer'
+    ports:
+      - '1433:1433'
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+    networks:
+      - fcg-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fcg-api
+    ports:
+      - "8080:80"
+    depends_on:
+      - sqlserver
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=FCG;User ID=sa;Password=Sql@1234;TrustServerCertificate=True;
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - fcg-network
+    restart: on-failure
+
+networks:
+  fcg-network:
+    driver: bridge
+
+volumes:
+  sqlserverdata:
