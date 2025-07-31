@@ -8,9 +8,7 @@ namespace FCG.Api.Configurations.Authentication;
 
 public static class JwtConfiguration
 {
-    public static IServiceCollection AddJwtAuthentication(
-        this IServiceCollection services,
-        IConfiguration cfg)
+    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services,IConfiguration cfg)
     {
         services.Configure<JwtSettings>(cfg.GetSection("Jwt"));
         var settings = cfg.GetSection("Jwt").Get<JwtSettings>()!;
@@ -19,6 +17,8 @@ public static class JwtConfiguration
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(opts =>
             {
+                opts.SaveToken = true;
+                opts.RequireHttpsMetadata = false;
                 opts.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer           = true,
@@ -28,7 +28,8 @@ public static class JwtConfiguration
                     ValidIssuer   = settings.Issuer,
                     ValidAudience = settings.Audience,
                     IssuerSigningKey =
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.SigningKey))
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.SigningKey)),
+                    ClockSkew = TimeSpan.Zero
                 };
             });
 

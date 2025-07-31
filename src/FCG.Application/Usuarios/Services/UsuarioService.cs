@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using FCG.Application.Usuarios.Interfaces;
 using FCG.Application.Usuarios.ViewModels;
 using FCG.Domain.Usuarios.Entities;
@@ -17,23 +18,20 @@ public class UsuarioService : IUsuarioService
     public async Task<Usuario?> AutenticarUsuarioAsync(string email, string senha)
     {
         var usuario = await _usuarioRepository.ObterPorEmailAsync(email);
-        return (usuario is not null && usuario.Senha == senha) ? usuario : null;
+        return (usuario is not null && usuario.Senha == senha) ?  usuario : null;
     }
 
-    public async Task<UsuarioResponse> Adicionar(CriarUsuarioRequest usuario)
+    public async Task<DadosUsuarioViewModel> Adicionar(UsuarioViewModel usuario)
     {
-        var novoUsuario = new Usuario
+        var usuarioAdicionado = await _usuarioRepository.Adicionar(new Usuario
         {
-            Id = Guid.NewGuid(),
             Nome = usuario.Nome,
             Email = usuario.Email,
             Senha = usuario.Senha,
             TipoUsuario = (TipoUsuario)usuario.TipoUsuario
-        };
+        });
 
-        var usuarioAdicionado = await _usuarioRepository.Adicionar(novoUsuario);
-
-        return new UsuarioResponse
+        return new DadosUsuarioViewModel
         {
             Id = usuarioAdicionado.Id,
             Nome = usuarioAdicionado.Nome,
@@ -54,9 +52,9 @@ public class UsuarioService : IUsuarioService
         return true;
     }
 
-    public async Task<UsuarioResponse?> Atualizar(Guid id, AtualizarUsuarioRequest usuario)
+    public async Task<DadosUsuarioViewModel> Atualizar(UsuarioViewModel usuario)
     {
-        var usuarioExistente = await _usuarioRepository.ObterPorId(id);
+        var usuarioExistente = await _usuarioRepository.ObterPorId(usuario.Id);
         if (usuarioExistente == null)
         {
             return null;
@@ -69,7 +67,7 @@ public class UsuarioService : IUsuarioService
 
         await _usuarioRepository.Atualizar(usuarioExistente);
 
-        return new UsuarioResponse
+        return new DadosUsuarioViewModel
         {
             Id = usuarioExistente.Id,
             Nome = usuarioExistente.Nome,
@@ -78,15 +76,20 @@ public class UsuarioService : IUsuarioService
         };
     }
 
-    public async Task<List<UsuarioResponse>> Consultar()
+    public void Dispose()
+    {
+        _usuarioRepository?.Dispose();
+    }
+
+    public async Task<List<DadosUsuarioViewModel>> Consultar()
     {
         var listaUsuario = await _usuarioRepository.ObterTodos();
         if (listaUsuario == null || !listaUsuario.Any())
         {
-            return new List<UsuarioResponse>();
+            return null;
         }
 
-        return listaUsuario.Select(usuario => new UsuarioResponse
+        return listaUsuario.Select(usuario => new DadosUsuarioViewModel
         {
             Id = usuario.Id,
             Nome = usuario.Nome,
@@ -95,8 +98,29 @@ public class UsuarioService : IUsuarioService
         }).ToList();
     }
 
-    public void Dispose()
+    public async Task<DadosUsuarioViewModel> ConsultarUsuario(Guid usuarioId)
     {
-        _usuarioRepository?.Dispose();
+        var usuarioExistente = await _usuarioRepository.ObterPorId(usuarioId);
+        if (usuarioExistente == null)
+        {
+            return null;
+        }
+
+        return new DadosUsuarioViewModel
+        {
+            Id = usuarioExistente.Id,
+            Nome = usuarioExistente.Nome,
+            Email = usuarioExistente.Email,
+            TipoUsuario = (TipoUsuarioViewModel)usuarioExistente.TipoUsuario
+        };
+    }
+
+    public async Task<Usuario?> ObterUsuario(Expression<Func<Usuario, bool>> predicate)
+    {
+        var usuarios = await _usuarioRepository.Buscar(predicate);
+        
+        if (usuarios == null || !usuarios.Any())  return null;
+        
+        return usuarios.ToList().FirstOrDefault();
     }
 }

@@ -4,12 +4,10 @@ using FCG.Api.Configurations;
 using FCG.Api.Configurations.Serilog;
 using FCG.Api.Configurations.Swagger;
 using FCG.Infrastructure;
-using FCG.Application.Authentication;
 using FCG.Api.Configurations.Authentication;
 using FCG.Application.Authentication.Interface;
 using FCG.Application.Authentication.Service;
 using Microsoft.EntityFrameworkCore;
-
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration);

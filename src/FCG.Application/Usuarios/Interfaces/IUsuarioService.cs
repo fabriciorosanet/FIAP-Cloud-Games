@@ -1,18 +1,16 @@
+using System.Linq.Expressions;
 using FCG.Application.Usuarios.ViewModels;
 using FCG.Domain.Usuarios.Entities;
-using System;
 
 namespace FCG.Application.Usuarios.Interfaces;
 
 public interface IUsuarioService : IDisposable
 {
     Task<Usuario?> AutenticarUsuarioAsync(string email, string senha);
-
-    Task<UsuarioResponse> Adicionar(CriarUsuarioRequest usuario);
-
+    Task<DadosUsuarioViewModel> Adicionar(UsuarioViewModel usuario);
     Task<bool> Excluir(Guid usuarioId);
-
-    Task<UsuarioResponse?> Atualizar(Guid id, AtualizarUsuarioRequest usuario);
-
-    Task<List<UsuarioResponse>> Consultar();
+    Task<DadosUsuarioViewModel> Atualizar(UsuarioViewModel usuario);
+    Task<List<DadosUsuarioViewModel>> Consultar();
+    Task<DadosUsuarioViewModel> ConsultarUsuario(Guid usuarioId);
+    Task<Usuario?> ObterUsuario(Expression<Func<Usuario, bool>> predicate);
 }
