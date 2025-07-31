@@ -60,5 +60,4 @@ public class UsuariosTestsExcluir
         mockUsuarioRepository.Verify(repo => repo.ObterPorId(id), Times.Once);
         mockUsuarioRepository.Verify(repo => repo.Remover(It.IsAny<Guid>()), Times.Never);
     }
-
 }

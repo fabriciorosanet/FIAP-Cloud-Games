@@ -18,18 +18,21 @@ public class UsuarioService : IUsuarioService
     public async Task<Usuario?> AutenticarUsuarioAsync(string email, string senha)
     {
         var usuario = await _usuarioRepository.ObterPorEmailAsync(email);
-        return (usuario is not null && usuario.Senha == senha) ?  usuario : null;
+        return (usuario is not null && usuario.Senha == senha) ? usuario : null;
     }
 
-    public async Task<DadosUsuarioViewModel> Adicionar(UsuarioViewModel usuario)
+    public async Task<DadosUsuarioViewModel> Adicionar(CriarUsuarioRequest usuario)
     {
-        var usuarioAdicionado = await _usuarioRepository.Adicionar(new Usuario
+        var novoUsuario = new Usuario
         {
+            Id = Guid.NewGuid(),
             Nome = usuario.Nome,
             Email = usuario.Email,
             Senha = usuario.Senha,
             TipoUsuario = (TipoUsuario)usuario.TipoUsuario
-        });
+        };
+
+        var usuarioAdicionado = await _usuarioRepository.Adicionar(novoUsuario);
 
         return new DadosUsuarioViewModel
         {
@@ -52,18 +55,33 @@ public class UsuarioService : IUsuarioService
         return true;
     }
 
-    public async Task<DadosUsuarioViewModel> Atualizar(UsuarioViewModel usuario)
+    public async Task<DadosUsuarioViewModel?> Atualizar(Guid id, AtualizarUsuarioRequest request)
     {
-        var usuarioExistente = await _usuarioRepository.ObterPorId(usuario.Id);
+        var usuarioExistente = await _usuarioRepository.ObterPorId(id);
         if (usuarioExistente == null)
         {
             return null;
         }
 
-        usuarioExistente.Nome = usuario.Nome;
-        usuarioExistente.Email = usuario.Email;
-        usuarioExistente.Senha = usuario.Senha;
-        usuarioExistente.TipoUsuario = (TipoUsuario)usuario.TipoUsuario;
+        if (!string.IsNullOrWhiteSpace(request.Nome))
+        {
+            usuarioExistente.Nome = request.Nome;
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Email))
+        {
+            usuarioExistente.Email = request.Email;
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Senha))
+        {
+            usuarioExistente.Senha = request.Senha;
+        }
+
+        if (request.TipoUsuario.HasValue)
+        {
+            usuarioExistente.TipoUsuario = (TipoUsuario)request.TipoUsuario.Value;
+        }
 
         await _usuarioRepository.Atualizar(usuarioExistente);
 
@@ -76,17 +94,12 @@ public class UsuarioService : IUsuarioService
         };
     }
 
-    public void Dispose()
-    {
-        _usuarioRepository?.Dispose();
-    }
-
     public async Task<List<DadosUsuarioViewModel>> Consultar()
     {
         var listaUsuario = await _usuarioRepository.ObterTodos();
         if (listaUsuario == null || !listaUsuario.Any())
         {
-            return null;
+            return new List<DadosUsuarioViewModel>();
         }
 
         return listaUsuario.Select(usuario => new DadosUsuarioViewModel
@@ -98,7 +111,7 @@ public class UsuarioService : IUsuarioService
         }).ToList();
     }
 
-    public async Task<DadosUsuarioViewModel> ConsultarUsuario(Guid usuarioId)
+    public async Task<DadosUsuarioViewModel?> ConsultarUsuario(Guid usuarioId)
     {
         var usuarioExistente = await _usuarioRepository.ObterPorId(usuarioId);
         if (usuarioExistente == null)
@@ -118,9 +131,14 @@ public class UsuarioService : IUsuarioService
     public async Task<Usuario?> ObterUsuario(Expression<Func<Usuario, bool>> predicate)
     {
         var usuarios = await _usuarioRepository.Buscar(predicate);
-        
-        if (usuarios == null || !usuarios.Any())  return null;
-        
+
+        if (usuarios == null || !usuarios.Any()) return null;
+
         return usuarios.ToList().FirstOrDefault();
+    }
+
+    public void Dispose()
+    {
+        _usuarioRepository?.Dispose();
     }
 }
