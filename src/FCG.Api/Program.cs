@@ -44,7 +44,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCorrelationId(); // Certifique-se de que o middleware de CorrelationId � chamado aqui
+app.UseCorrelationId();
 app.EndpointsMap(); 
 
 app.Run();

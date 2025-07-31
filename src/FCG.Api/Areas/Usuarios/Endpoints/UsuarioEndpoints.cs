@@ -1,17 +1,51 @@
+using System.ComponentModel.DataAnnotations;
 using FCG.Application.Usuarios.Interfaces;
 using FCG.Application.Usuarios.ViewModels;
-using FCG.Domain.Usuarios.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Builder;
+using System.Linq; // Adicionar para .Any() e .Select()
 
 namespace FCG.Api.Areas.Usuarios.Endpoints;
 
 public static class UsuarioEndpoints
 {
     public static void MapUsuarioEndpoints(this IEndpointRouteBuilder routes)
-    {      
-        routes.MapPost("/usuario/adicionar", async (IUsuarioService service, ILoggerFactory loggerFactory, [FromBody] UsuarioViewModel novoUsuario) =>
+    {
+        routes.MapGet("/usuario/consultar", async (IUsuarioService service, ILoggerFactory loggerFactory) =>
+        {
+            var logger = loggerFactory.CreateLogger("UsuarioEndpoint");
+
+            try
+            {
+                var listaUsuario = await service.Consultar();
+                if (listaUsuario == null || !listaUsuario.Any())
+                {
+                    logger.LogWarning("Nenhum usuário cadastrado.");
+                    return Results.NotFound("Nenhum usuário cadastrado.");
+                }
+
+                var response = listaUsuario.Select(u => new UsuarioResponse
+                {
+                    Id = u.Id,
+                    Nome = u.Nome,
+                    Email = u.Email,
+                    TipoUsuario = u.TipoUsuario
+                });
+
+                return Results.Ok(response);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro ao consultar os usuários.");
+                return Results.Problem("Erro ao consultar os usuários.");
+            }
+        })
+        .RequireAuthorization("Admin")
+        .WithName("ConsultarTodosUsuarios")
+        .WithSummary("Consultar todos os usuários");
+
+        routes.MapPost("/usuario/adicionar", async (IUsuarioService service, ILoggerFactory loggerFactory, [FromBody] CriarUsuarioRequest novoUsuario) =>
         {
             var logger = loggerFactory.CreateLogger("UsuarioEndpoint");
             logger.LogInformation("Requisição recebida para /usuario/adicionar");
@@ -24,7 +58,7 @@ public static class UsuarioEndpoints
                 return Results.BadRequest(validationResults);
             }
 
-            if(service.ObterUsuario(u => u.Email == novoUsuario.Email).Result != null)
+            if (service.ObterUsuario(u => u.Email == novoUsuario.Email).Result != null)
             {
                 logger.LogWarning("Usuário com o email {Email} já cadastrado.", novoUsuario.Email);
                 return Results.Conflict($"Usuário com o email {novoUsuario.Email} já cadastrado.");
@@ -32,28 +66,36 @@ public static class UsuarioEndpoints
 
             try
             {
-                var usuario = await service.Adicionar(novoUsuario);
-                return Results.Ok(usuario);
+                var usuarioAdicionado = await service.Adicionar(novoUsuario);
+
+                var response = new UsuarioResponse
+                {
+                    Id = usuarioAdicionado.Id,
+                    Nome = usuarioAdicionado.Nome,
+                    Email = usuarioAdicionado.Email,
+                    TipoUsuario = usuarioAdicionado.TipoUsuario
+                };
+
+                return Results.Created($"/usuario/{response.Id}", response);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Erro ao adicionar o usuário.");
                 return Results.Problem("Erro interno ao adicionar o usuário.");
             }
-
         })
         .AllowAnonymous()
         .WithName("AdicionarUsuario")
         .WithSummary("Adiciona um novo usuário ao sistema");
 
-        routes.MapPut("/usuario/atualizar", async (IUsuarioService service, ILoggerFactory loggerFactory, [FromBody] UsuarioViewModel usuarioAtualizado) =>
+        routes.MapPut("/usuario/atualizar/{id:guid}", async (IUsuarioService service, ILoggerFactory loggerFactory, Guid id, [FromBody] AtualizarUsuarioRequest request) =>
         {
             var logger = loggerFactory.CreateLogger("UsuarioEndpoint");
-            logger.LogInformation("Requisição recebida para /usuario/atualizar");
+            logger.LogInformation("Requisição recebida para /usuario/atualizar/{id}", id);
 
-            var validationContext = new ValidationContext(usuarioAtualizado);
+            var validationContext = new ValidationContext(request);
             var validationResults = new List<ValidationResult>();
-            if (!Validator.TryValidateObject(usuarioAtualizado, validationContext, validationResults, true))
+            if (!Validator.TryValidateObject(request, validationContext, validationResults, true))
             {
                 logger.LogWarning("Modelo inválido: {@ValidationErrors}", validationResults);
                 return Results.BadRequest(validationResults);
@@ -61,61 +103,59 @@ public static class UsuarioEndpoints
 
             try
             {
-                var usuario = await service.Atualizar(usuarioAtualizado);
-                if (usuario == null)
+                var existingUserById = await service.ConsultarUsuario(id);
+                if (existingUserById == null)
                 {
-                    logger.LogWarning("Usuário com ID {Id} não encontrado.", usuarioAtualizado.Id);
-                    return Results.NotFound($"Usuário com ID {usuarioAtualizado.Id} não encontrado.");
+                    logger.LogWarning("Usuário com ID {Id} não encontrado para atualização.", id);
+                    return Results.NotFound($"Usuário com ID {id} não encontrado.");
                 }
 
-                return Results.Ok(usuario);
+                // Verifica se o email está sendo alterado e se o novo email já pertence a outro usuário
+                if (!string.IsNullOrWhiteSpace(request.Email) && request.Email != existingUserById.Email)
+                {
+                    var userWithSameEmail = await service.ObterUsuario(u => u.Email == request.Email);
+                    if (userWithSameEmail != null && userWithSameEmail.Id != id)
+                    {
+                        logger.LogWarning("Email {Email} já está em uso por outro usuário.", request.Email);
+                        return Results.Conflict($"O email '{request.Email}' já está cadastrado para outro usuário.");
+                    }
+                }
+
+                var usuarioAtualizado = await service.Atualizar(id, request);
+                if (usuarioAtualizado == null)
+                {
+                    logger.LogError("Falha inesperada ao atualizar usuário com ID {Id}.", id);
+                    return Results.Problem("Erro interno ao atualizar o usuário.");
+                }
+
+                var response = new UsuarioResponse
+                {
+                    Id = usuarioAtualizado.Id,
+                    Nome = usuarioAtualizado.Nome,
+                    Email = usuarioAtualizado.Email,
+                    TipoUsuario = usuarioAtualizado.TipoUsuario
+                };
+
+                return Results.Ok(response);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Erro ao atualizar o usuário com ID {Id}.", usuarioAtualizado.Id);
+                logger.LogError(ex, "Erro ao atualizar o usuário com ID {Id}.", id);
                 return Results.Problem("Erro interno ao atualizar o usuário.");
             }
         })
         .RequireAuthorization("Admin")
         .WithName("AtualizarUsuario")
-        .WithSummary("Atualiza um usuário existente no sistema");
-
-        routes.MapGet("/usuario/consultar", async (IUsuarioService service, ILoggerFactory loggerFactory) =>
-        {
-            var logger = loggerFactory.CreateLogger("UsuarioEndpoint");
-            logger.LogInformation("Requisição recebida para /usuario/consultar");
-
-            try
-            {
-                var listaUsuario = await service.Consultar();
-                if (listaUsuario == null)
-                {
-                    logger.LogWarning("Nenhum usuário cadastrado");
-                    return Results.NotFound($"Nenhum usuário cadastrado");
-                }
-
-                return Results.Ok(listaUsuario);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Erro ao consultar os usuários.");
-                return Results.Problem("Erro ao consultar os usuários.");
-            }
-        })
-        .RequireAuthorization("Admin")
-        .WithName("ConsultarUsuarios")
-        .WithSummary("Consultar usuarios");
+        .WithSummary("Atualiza um usuário existente no sistema por ID");
 
         routes.MapGet("/usuario/consultarUsuario/{id:guid}", async (IUsuarioService service, ILoggerFactory loggerFactory, Guid id) =>
         {
-
             var logger = loggerFactory.CreateLogger("UsuarioEndpoint");
-            logger.LogInformation("Requisição recebida para /usuario/consultarUsuario");
-
-            DadosUsuarioViewModel usuario = await service.ConsultarUsuario(id);
+            logger.LogInformation("Requisição recebida para /usuario/consultarUsuario/{id}", id);
 
             try
             {
+                var usuario = await service.ConsultarUsuario(id);
                 if (usuario == null)
                 {
                     logger.LogWarning("Usuário com ID {Id} não encontrado.", id);
@@ -126,14 +166,13 @@ public static class UsuarioEndpoints
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Erro ao consultar o usuário com ID {Id}.", usuario.Id);
+                logger.LogError(ex, "Erro ao consultar o usuário com ID {Id}.", id);
                 return Results.Problem("Erro interno ao consultar o usuário.");
             }
-
         })
         .RequireAuthorization("Admin")
-        .WithName("ConsultarUsuario")
-        .WithSummary("Consultar usuarios");
+        .WithName("ConsultarUsuarioPorId")
+        .WithSummary("Consultar usuário específico por ID");
 
         routes.MapDelete("/usuario/excluir/{id:guid}", async (IUsuarioService service, ILoggerFactory loggerFactory, Guid id) =>
         {
@@ -145,7 +184,7 @@ public static class UsuarioEndpoints
                 var sucesso = await service.Excluir(id);
                 if (!sucesso)
                 {
-                    logger.LogWarning("Usuário com ID {Id} não encontrado.", id);
+                    logger.LogWarning("Usuário com ID {Id} não encontrado para exclusão.", id);
                     return Results.NotFound($"Usuário com ID {id} não encontrado.");
                 }
 
@@ -159,10 +198,6 @@ public static class UsuarioEndpoints
         })
         .RequireAuthorization("Admin")
         .WithName("ExcluirUsuario")
-        .WithSummary("Exclui um usuário existente no sistema");
-
-
-
-
+        .WithSummary("Exclui um usuário existente no sistema por ID");
     }
 }
