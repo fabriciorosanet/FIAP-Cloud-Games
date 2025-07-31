@@ -223,3 +223,15 @@ project.lock.json
 
 # UWP Projects
 AppPackages/
+/src/FCG.Infrastructure/Migrations/20250514001105_NomeDaMigration.cs
+/src/FCG.Api/Properties/launchSettings.json
+/src/FCG.Api/appsettings.json
+/src/FCG.Infrastructure/Migrations/20250514002529_CreateUsuarioss.cs
+/src/FCG.Infrastructure/Migrations/20250514234354_CreateUsuarios_v2.cs
+/src/FCG.Infrastructure/Migrations/20250514234354_CreateUsuarios_v2.Designer.cs
+/src/FCG.Infrastructure/Migrations/20250514234415_NomeDaMigration_v2.cs
+/src/FCG.Infrastructure/Migrations/20250514234415_NomeDaMigration_v2.Designer.cs
+/src/FCG.Infrastructure/Migrations/20250515002053_CreateUsuariosss.cs
+/src/FCG.Infrastructure/Migrations/20250515002053_CreateUsuariosss.Designer.cs
+/src/FCG.Infrastructure/Migrations/20250515002133_NomeDaMigration_v3.cs
+/src/FCG.Infrastructure/Migrations/20250515002133_NomeDaMigration_v3.Designer.cs
