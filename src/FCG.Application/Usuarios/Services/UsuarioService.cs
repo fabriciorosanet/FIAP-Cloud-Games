@@ -17,20 +17,23 @@ public class UsuarioService : IUsuarioService
     public async Task<Usuario?> AutenticarUsuarioAsync(string email, string senha)
     {
         var usuario = await _usuarioRepository.ObterPorEmailAsync(email);
-        return (usuario is not null && usuario.Senha == senha) ?  usuario : null;
+        return (usuario is not null && usuario.Senha == senha) ? usuario : null;
     }
 
-    public async Task<DadosUsuarioViewModel> Adicionar(UsuarioViewModel usuario)
+    public async Task<UsuarioResponse> Adicionar(CriarUsuarioRequest usuario)
     {
-        var usuarioAdicionado = await _usuarioRepository.Adicionar(new Usuario
+        var novoUsuario = new Usuario
         {
+            Id = Guid.NewGuid(),
             Nome = usuario.Nome,
             Email = usuario.Email,
             Senha = usuario.Senha,
             TipoUsuario = (TipoUsuario)usuario.TipoUsuario
-        });
+        };
 
-        return new DadosUsuarioViewModel
+        var usuarioAdicionado = await _usuarioRepository.Adicionar(novoUsuario);
+
+        return new UsuarioResponse
         {
             Id = usuarioAdicionado.Id,
             Nome = usuarioAdicionado.Nome,
@@ -51,9 +54,9 @@ public class UsuarioService : IUsuarioService
         return true;
     }
 
-    public async Task<DadosUsuarioViewModel> Atualizar(UsuarioViewModel usuario)
+    public async Task<UsuarioResponse?> Atualizar(Guid id, AtualizarUsuarioRequest usuario)
     {
-        var usuarioExistente = await _usuarioRepository.ObterPorId(usuario.Id);
+        var usuarioExistente = await _usuarioRepository.ObterPorId(id);
         if (usuarioExistente == null)
         {
             return null;
@@ -66,7 +69,7 @@ public class UsuarioService : IUsuarioService
 
         await _usuarioRepository.Atualizar(usuarioExistente);
 
-        return new DadosUsuarioViewModel
+        return new UsuarioResponse
         {
             Id = usuarioExistente.Id,
             Nome = usuarioExistente.Nome,
@@ -75,25 +78,25 @@ public class UsuarioService : IUsuarioService
         };
     }
 
-    public void Dispose()
-    {
-        _usuarioRepository?.Dispose();
-    }
-
-    public async Task<List<DadosUsuarioViewModel>> Consultar()
+    public async Task<List<UsuarioResponse>> Consultar()
     {
         var listaUsuario = await _usuarioRepository.ObterTodos();
         if (listaUsuario == null || !listaUsuario.Any())
         {
-            return null;
+            return new List<UsuarioResponse>();
         }
 
-        return listaUsuario.Select(usuario => new DadosUsuarioViewModel
+        return listaUsuario.Select(usuario => new UsuarioResponse
         {
             Id = usuario.Id,
             Nome = usuario.Nome,
             Email = usuario.Email,
             TipoUsuario = (TipoUsuarioViewModel)usuario.TipoUsuario
         }).ToList();
+    }
+
+    public void Dispose()
+    {
+        _usuarioRepository?.Dispose();
     }
 }

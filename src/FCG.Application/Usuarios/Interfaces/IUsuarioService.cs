@@ -1,13 +1,18 @@
 using FCG.Application.Usuarios.ViewModels;
 using FCG.Domain.Usuarios.Entities;
+using System;
 
 namespace FCG.Application.Usuarios.Interfaces;
 
 public interface IUsuarioService : IDisposable
 {
     Task<Usuario?> AutenticarUsuarioAsync(string email, string senha);
-    Task<DadosUsuarioViewModel> Adicionar(UsuarioViewModel usuario);
+
+    Task<UsuarioResponse> Adicionar(CriarUsuarioRequest usuario);
+
     Task<bool> Excluir(Guid usuarioId);
-    Task<DadosUsuarioViewModel> Atualizar(UsuarioViewModel usuario);
-    Task<List<DadosUsuarioViewModel>> Consultar();
+
+    Task<UsuarioResponse?> Atualizar(Guid id, AtualizarUsuarioRequest usuario);
+
+    Task<List<UsuarioResponse>> Consultar();
 }

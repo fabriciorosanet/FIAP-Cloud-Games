@@ -9,55 +9,91 @@ namespace FCG.Tests.Usuarios;
 
 public class UsuariosTests
 {
-    [Fact(DisplayName = "Deve validar um Usuario válido")]
-    public void Usuario_Valido_DeveSerValido()
+    [Fact(DisplayName = "Deve validar um CriarUsuarioRequest válido")]
+    public void CriarUsuarioRequest_Valido_DeveSerValido()
     {
-        // Given: Um UsuarioDTO válido
-        var usuarioDto = new UsuarioViewModel
+        var criarUsuarioRequest = new CriarUsuarioRequest
         {
-            Id = Guid.NewGuid(),
-            Nome = "João Silva",
-            Email = "joao.silva@email.com",
-            Senha = "Senha@123",
+            Nome = "Maria Souza",
+            Email = "maria.souza@email.com",
+            Senha = "Senha@456",
+            TipoUsuario = TipoUsuarioViewModel.Usuario
+        };
+
+        var validationResults = new List<ValidationResult>();
+        var validationContext = new ValidationContext(criarUsuarioRequest);
+
+        var isValid = Validator.TryValidateObject(criarUsuarioRequest, validationContext, validationResults, true);
+
+        Assert.True(isValid, "O CriarUsuarioRequest deveria ser válido.");
+        Assert.Empty(validationResults);
+    }
+
+    [Fact(DisplayName = "Deve falhar ao validar um CriarUsuarioRequest inválido")]
+    public void CriarUsuarioRequest_Invalido_DeveRetornarErrosDeValidacao()
+    {
+        var criarUsuarioRequest = new CriarUsuarioRequest
+        {
+            Nome = "",
+            Email = "email-invalido",
+            Senha = "abc",
+            TipoUsuario = (TipoUsuarioViewModel)99
+        };
+
+        var validationResults = new List<ValidationResult>();
+        var validationContext = new ValidationContext(criarUsuarioRequest);
+
+        var isValid = Validator.TryValidateObject(criarUsuarioRequest, validationContext, validationResults, true);
+
+        Assert.False(isValid, "O CriarUsuarioRequest deveria ser inválido.");
+        Assert.NotEmpty(validationResults);
+
+        Assert.Contains(validationResults, v => v.ErrorMessage != null && v.ErrorMessage.Contains("O campo Nome é obrigatório."));
+        Assert.Contains(validationResults, v => v.ErrorMessage != null && v.ErrorMessage.Contains("O Email informado não é válido."));
+        Assert.Contains(validationResults, v => v.ErrorMessage != null && v.ErrorMessage.Contains("A Senha deve conter no mínimo 8 caracteres, incluindo letras, números e caracteres especiais."));
+        Assert.Contains(validationResults, v => v.ErrorMessage != null && v.ErrorMessage.Contains("O TipoUsuario informado não é válido."));
+    }
+
+    [Fact(DisplayName = "Deve validar um AtualizarUsuarioRequest válido")]
+    public void AtualizarUsuarioRequest_Valido_DeveSerValido()
+    {
+        var atualizarUsuarioRequest = new AtualizarUsuarioRequest
+        {
+            Nome = "Carlos Santos",
+            Email = "carlos.santos@email.com",
+            Senha = "Senha@789",
             TipoUsuario = TipoUsuarioViewModel.Administrador
         };
 
         var validationResults = new List<ValidationResult>();
-        var validationContext = new ValidationContext(usuarioDto);
+        var validationContext = new ValidationContext(atualizarUsuarioRequest);
 
-        // When: Validamos o objeto
-        var isValid = Validator.TryValidateObject(usuarioDto, validationContext, validationResults, true);
+        var isValid = Validator.TryValidateObject(atualizarUsuarioRequest, validationContext, validationResults, true);
 
-        // Then: O objeto deve ser válido
-        Assert.True(isValid, "O UsuarioDTO deveria ser válido.");
+        Assert.True(isValid, "O AtualizarUsuarioRequest deveria ser válido.");
         Assert.Empty(validationResults);
     }
 
-    [Fact(DisplayName = "Deve falhar ao validar um Usuario inválido")]
-    public void Usuario_Invalido_DeveRetornarErrosDeValidacao()
+    [Fact(DisplayName = "Deve falhar ao validar um AtualizarUsuarioRequest inválido")]
+    public void AtualizarUsuarioRequest_Invalido_DeveRetornarErrosDeValidacao()
     {
-        // Given: Um UsuarioDTO inválido
-        var usuarioDto = new UsuarioViewModel
+        var atualizarUsuarioRequest = new AtualizarUsuarioRequest
         {
-            Id = Guid.NewGuid(),
-            Nome = "", // Nome inválido (vazio)
-            Email = "email-invalido", // Email inválido
-            Senha = "123", // Senha inválida (não atende aos requisitos)
-            TipoUsuario = (TipoUsuarioViewModel)99 // TipoUsuario inválido
+            Nome = "Um nome muito, muito, muito, muito, muito, muito, muito, muito, muito, muito, muito, muito, muito, muito, muito, muito, muito, muito longo que excede o limite de 100 caracteres",
+            Email = "invalid-email",
+            Senha = "curta",
+            TipoUsuario = (TipoUsuarioViewModel)0
         };
 
         var validationResults = new List<ValidationResult>();
-        var validationContext = new ValidationContext(usuarioDto);
+        var validationContext = new ValidationContext(atualizarUsuarioRequest);
 
-        // When: Validamos o objeto
-        var isValid = Validator.TryValidateObject(usuarioDto, validationContext, validationResults, true);
+        var isValid = Validator.TryValidateObject(atualizarUsuarioRequest, validationContext, validationResults, true);
 
-        // Then: O objeto deve ser inválido e conter erros de validação
-        Assert.False(isValid, "O UsuarioDTO deveria ser inválido.");
+        Assert.False(isValid, "O AtualizarUsuarioRequest deveria ser inválido.");
         Assert.NotEmpty(validationResults);
 
-        // Verifica mensagens de erro específicas
-        Assert.Contains(validationResults, v => v.ErrorMessage != null && v.ErrorMessage.Contains("O campo Nome é obrigatório."));
+        Assert.Contains(validationResults, v => v.ErrorMessage != null && v.ErrorMessage.Contains("O Nome deve ter no máximo 100 caracteres."));
         Assert.Contains(validationResults, v => v.ErrorMessage != null && v.ErrorMessage.Contains("O Email informado não é válido."));
         Assert.Contains(validationResults, v => v.ErrorMessage != null && v.ErrorMessage.Contains("A Senha deve conter no mínimo 8 caracteres, incluindo letras, números e caracteres especiais."));
         Assert.Contains(validationResults, v => v.ErrorMessage != null && v.ErrorMessage.Contains("O TipoUsuario informado não é válido."));
@@ -66,15 +102,13 @@ public class UsuariosTests
     [Fact(DisplayName = "Deve adicionar um novo usuário com sucesso")]
     public async Task Adicionar_DeveAdicionarUsuarioComSucesso()
     {
-        // Given: Um DTO de usuário válido e um mock do repositório
         var id = Guid.NewGuid();
 
-        var usuarioDto = new UsuarioViewModel
+        var criarUsuarioRequest = new CriarUsuarioRequest
         {
-            Id = id,
             Nome = "João Silva",
             Email = "joao.silva@email.com",
-            Senha = "senha123",
+            Senha = "Senha@123",
             TipoUsuario = TipoUsuarioViewModel.Administrador
         };
 
@@ -83,7 +117,7 @@ public class UsuariosTests
             Id = id,
             Nome = "João Silva",
             Email = "joao.silva@email.com",
-            Senha = "senha123",
+            Senha = "Senha@123",
             TipoUsuario = TipoUsuario.Administrador
         };
 
@@ -94,17 +128,14 @@ public class UsuariosTests
 
         var usuarioService = new UsuarioService(mockUsuarioRepository.Object);
 
-        // When: O método Adicionar é chamado
-        var resultado = await usuarioService.Adicionar(usuarioDto);
+        var resultado = await usuarioService.Adicionar(criarUsuarioRequest);
 
-        // Then: O resultado deve conter os dados esperados
         Assert.NotNull(resultado);
         Assert.Equal(usuarioAdicionado.Id, resultado.Id);
         Assert.Equal(usuarioAdicionado.Nome, resultado.Nome);
         Assert.Equal(usuarioAdicionado.Email, resultado.Email);
         Assert.Equal((int)usuarioAdicionado.TipoUsuario, (int)resultado.TipoUsuario);
 
-        // Verifica se o método Adicionar do repositório foi chamado uma vez
         mockUsuarioRepository.Verify(repo => repo.Adicionar(It.IsAny<Usuario>()), Times.Once);
     }
 }

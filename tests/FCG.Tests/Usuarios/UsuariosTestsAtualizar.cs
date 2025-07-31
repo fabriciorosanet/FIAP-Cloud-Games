@@ -14,9 +14,8 @@ public class UsuariosTestsAtualizar
     {
         var id = Guid.NewGuid();
 
-        var usuarioDto = new UsuarioViewModel
+        var atualizarUsuarioRequest = new AtualizarUsuarioRequest
         {
-            Id = id,
             Nome = "Gustavo Mendonça",
             Email = "gustavo.mendonca@email.com",
             Senha = "Senha@123",
@@ -42,12 +41,12 @@ public class UsuariosTestsAtualizar
             .Returns(Task.CompletedTask);
 
         var usuarioService = new UsuarioService(mockUsuarioRepository.Object);
-        var resultado = await usuarioService.Atualizar(usuarioDto);
+        var resultado = await usuarioService.Atualizar(id, atualizarUsuarioRequest);
 
         Assert.NotNull(resultado);
-        Assert.Equal(usuarioDto.Nome, resultado.Nome);
-        Assert.Equal(usuarioDto.Email, resultado.Email);
-        Assert.Equal((int)usuarioDto.TipoUsuario, (int)resultado.TipoUsuario);
+        Assert.Equal(atualizarUsuarioRequest.Nome, resultado.Nome);
+        Assert.Equal(atualizarUsuarioRequest.Email, resultado.Email);
+        Assert.Equal((int)atualizarUsuarioRequest.TipoUsuario, (int)resultado.TipoUsuario);
 
         mockUsuarioRepository.Verify(repo => repo.ObterPorId(id), Times.Once);
         mockUsuarioRepository.Verify(repo => repo.Atualizar(It.IsAny<Usuario>()), Times.Once);
@@ -58,9 +57,8 @@ public class UsuariosTestsAtualizar
     {
         var id = Guid.NewGuid();
 
-        var usuarioDto = new UsuarioViewModel
+        var atualizarUsuarioRequest = new AtualizarUsuarioRequest
         {
-            Id = id,
             Nome = "Gustavo Mendonça",
             Email = "gustavo.mendonca@email.com",
             Senha = "Senha@123",
@@ -73,12 +71,11 @@ public class UsuariosTestsAtualizar
             .ReturnsAsync((Usuario)null);
 
         var usuarioService = new UsuarioService(mockUsuarioRepository.Object);
-        var resultado = await usuarioService.Atualizar(usuarioDto);
+        var resultado = await usuarioService.Atualizar(id, atualizarUsuarioRequest);
 
         Assert.Null(resultado);
 
         mockUsuarioRepository.Verify(repo => repo.ObterPorId(id), Times.Once);
         mockUsuarioRepository.Verify(repo => repo.Atualizar(It.IsAny<Usuario>()), Times.Never);
     }
-
 }
