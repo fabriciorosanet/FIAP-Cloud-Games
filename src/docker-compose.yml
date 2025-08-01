@@ -46,8 +46,26 @@ services:
       - fcg-network
     restart: on-failure
 
+  agent:
+    container_name: newrelic-infra
+    build:
+      context: ./newrelic-infra
+      dockerfile: newrelic-infra.dockerfile
+    cap_add:
+      - SYS_PTRACE
+    pid: host
+    privileged: true
+    volumes:
+      - "/:/host:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    restart: unless-stopped
+    networks:
+      - newrelic_bridge
+
 networks:
   fcg-network:
+    driver: bridge
+  newrelic_bridge:
     driver: bridge
 
 volumes:
