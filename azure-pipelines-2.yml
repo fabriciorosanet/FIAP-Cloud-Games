@@ -1,0 +1,59 @@
+trigger:
+  branches:
+    exclude:
+      - main
+
+pr:
+  branches:
+    include:
+      - '*'
+
+stages:
+  - stage: CI
+    displayName: 'Integração Contínua'
+    jobs:
+      - job: BuildAndTest
+        displayName: 'Build e Testes'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: self
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '9.0.x'
+          - script: dotnet restore
+            displayName: 'Restaurar dependências'
+          - script: dotnet build --no-restore --configuration Release
+            displayName: 'Build'
+          - script: dotnet test --no-build --verbosity normal
+            displayName: 'Testes'
+          - script: dotnet publish src/FCG.Api/FCG.Api.csproj -c Release -o $(Build.ArtifactStagingDirectory)
+            displayName: 'Publicar aplicação'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'drop'
+              publishLocation: 'Container'
+
+  - stage: CD
+    displayName: 'Entrega Contínua'
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployWebApp
+        displayName: 'Deploy no Azure Web App'
+        environment: 'production'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: drop
+                - task: AzureWebApp@1
+                  inputs:
+                    azureSubscription: 'Azure subscription 1' # Substitua pelo nome da conexão de serviço
+                    appType: 'webApp'
+                    appName: 'fase2-postech' # Substitua pelo nome do Web App
+                    package: '$(Pipeline.Workspace)/drop'
