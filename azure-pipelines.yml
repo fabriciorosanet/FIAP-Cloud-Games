@@ -53,7 +53,7 @@ stages:
                   artifact: drop
                 - task: AzureWebApp@1
                   inputs:
-                    azureSubscription: 'Azure subscription 1' # Substitua pelo nome da conexão de serviço
+                    azureSubscription: '8067f8c7-6b4f-4d1b-bb8c-c6251dc2d984' # Substitua pelo nome da conexão de serviço
                     appType: 'webApp'
                     appName: 'fase2-postech' # Substitua pelo nome do Web App
                     package: '$(Pipeline.Workspace)/drop'
