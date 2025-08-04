@@ -34,11 +34,10 @@ stages:
 
   - stage: CD
     displayName: "Deploy to Azure Web App"
-    condition: and(succeeded(),eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     jobs:
-      - deployment: DeployWebApp
+      - job: DeployWebApp
         displayName: "Deploy to Azure Web App"
-        environment: 'production'
         pool:
           vmImage: 'ubuntu-latest'
         steps:
