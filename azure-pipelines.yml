@@ -13,11 +13,7 @@ pr:
 stages:
   - stage: CI
     displayName: "Build & Test"
-    condition: or(
-      eq(variables['Build.Reason'], 'PullRequest'),
-      ne(variables['Build.SourceBranch'], 'refs/heads/main'),
-      eq(variables['Build.Reason'], 'Manual')
-    )
+    condition: or(eq(variables['Build.Reason'], 'PullRequest'), ne(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'Manual'))
     jobs:
       - job: BuildAndTest
         displayName: "Build and run tests"
@@ -38,13 +34,7 @@ stages:
 
   - stage: CD
     displayName: "Deploy to Azure Web App"
-    condition: and(
-      succeeded(),
-      or(
-      eq(variables['Build.SourceBranch'], 'refs/heads/main'),
-      eq(variables['Build.Reason'], 'Manual')
-      )
-    )
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'Manual')))
     jobs:
       - job: DeployWebApp
         displayName: "Deploy to Azure Web App"
