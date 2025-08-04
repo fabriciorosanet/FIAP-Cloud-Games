@@ -15,7 +15,7 @@ stages:
       - job: BuildAndTest
         displayName: 'Build e Testes'
         pool:
-          vmImage: 'Default'
+          vmImage: 'Hosted Agent'
         steps:
           - checkout: self
           - task: UseDotNet@2
@@ -44,7 +44,7 @@ stages:
         displayName: 'Deploy no Azure Web App'
         environment: 'production'
         pool:
-          vmImage: 'Default'
+          vmImage: 'Hosted Agent'
         strategy:
           runOnce:
             deploy:
