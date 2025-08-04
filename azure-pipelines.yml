@@ -26,7 +26,7 @@ stages:
           - task: UseDotNet@2
             inputs:
               packageType: 'sdk'
-              version: '8.x'
+              version: '9.0.x'
               installationPath: $(Agent.ToolsDirectory)/dotnet
 
           - script: dotnet build --configuration Release
@@ -51,7 +51,7 @@ stages:
           - task: UseDotNet@2
             inputs:
               packageType: 'sdk'
-              version: '8.x'
+              version: '9.0.x'
               installationPath: $(Agent.ToolsDirectory)/dotnet
 
           - script: dotnet publish --configuration Release --output $(Build.ArtifactStagingDirectory)
@@ -67,7 +67,9 @@ stages:
 
           - task: AzureWebApp@1
             inputs:
-              azureSubscription: '<NOME_DA_CONEXAO_DE_SERVICO>'
+              azureSubscription: 'postech-fase2'
               appType: 'webApp'
-              appName: '<NOME_DO_SEU_WEBAPP>'
+              appName: 'webapp-postech'
               package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+              runtimeStack: 'DOTNETCORE|9.0'
+              resourceGroupName: 'ACR'
