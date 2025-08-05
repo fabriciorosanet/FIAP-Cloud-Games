@@ -71,6 +71,35 @@ A API será iniciada em `https://localhost:5018` (ou conforme configurado).
 
 ---
 
+## 🔍 Monitoramento com New Relic
+
+O projeto utiliza **New Relic** para monitoramento de desempenho e rastreamento de erros. Certifique-se de configurar a chave de licença no ambiente antes de iniciar a aplicação. Para mais informações, consulte a [documentação oficial do New Relic](https://docs.newrelic.com/).
+
+---
+
+## 🚀 Deploy com Azure DevOps e WebApp
+
+O pipeline de deploy utiliza o **Azure DevOps** para automação, com publicação em um **Azure WebApp**. Certifique-se de configurar as variáveis de ambiente no pipeline, como a conexão com o banco de dados e as credenciais do Azure.
+
+---
+## 🐳 Imagem Docker no Azure Container Registry (ACR)
+
+A aplicação é empacotada em uma imagem Docker e publicada no **Azure Container Registry (ACR)**. Para configurar o ACR, siga os passos abaixo:
+
+1. Crie um ACR no portal do Azure.
+2. Configure as credenciais no pipeline do Azure DevOps.
+3. A imagem será automaticamente enviada para o repositório após o build.
+
+---
+
+## 📜 Azure Pipelines (CI/CD)
+
+O arquivo `azure-pipelines.yml` está configurado com um pipeline multi-stage. A regra é:
+
+- **CI**: Executado em PRs e commits em qualquer branch, exceto `main`.
+- **CD**: Executado apenas em commits na branch `main` (após merge).
+
+
 ### 📂 Estrutura do Projeto
 
 * `FCG.Api`: Camada de API e endpoints
@@ -78,5 +107,8 @@ A API será iniciada em `https://localhost:5018` (ou conforme configurado).
 * `FCG.Domain`: Entidades e interfaces
 * `FCG.Infrastructure`: EF Core + Repositórios
 * `Configurations`: Serilog, Swagger, Correlation ID
+* `Tests`: Testes unitários e de integração
+* `Migrations`: Scripts de migração do EF Core
+* `Dockerfile`: Configuração para containerização
 
 ---
