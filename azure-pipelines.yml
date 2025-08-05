@@ -18,7 +18,7 @@ stages:
       - job: BuildAndTest
         displayName: "Build and run tests"
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: 'vmPOSTECH'
         steps:
           - task: UseDotNet@2
             inputs:
@@ -39,7 +39,7 @@ stages:
       - job: DeployWebApp
         displayName: "Deploy to Azure Web App"
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: 'vmPOSTECH'
         steps:
           - task: UseDotNet@2
             inputs:
