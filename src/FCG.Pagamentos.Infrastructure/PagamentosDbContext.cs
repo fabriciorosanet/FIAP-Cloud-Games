@@ -26,7 +26,7 @@ public class PagamentosDbContext : DbContext
             
             entity.HasIndex(e => e.Referencia).IsUnique();
             entity.HasIndex(e => e.UsuarioId);
-            entity.HasIndex(e => e.StatusTransacao);
+            entity.HasIndex(e => e.Status);
         });
 
         modelBuilder.Entity<Reembolso>(entity =>

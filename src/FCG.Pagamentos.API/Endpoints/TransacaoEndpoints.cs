@@ -64,7 +64,7 @@ public static class TransacaoEndpoints
         {
             try
             {
-                var transacoes = await service.ObterTodasAsync();
+                var transacoes = await service.ObterTodosAsync();
                 return Results.Ok(transacoes);
             }
             catch (Exception ex)
@@ -80,7 +80,7 @@ public static class TransacaoEndpoints
         {
             try
             {
-                var transacoes = await service.ObterPorUsuarioAsync(usuarioId);
+                var transacoes = await service.ObterPorIdAsync(usuarioId);
                 return Results.Ok(transacoes);
             }
             catch (Exception ex)
@@ -123,10 +123,7 @@ public static class TransacaoEndpoints
         {
             try
             {
-                var resultado = await service.ExcluirAsync(id);
-                if (!resultado)
-                    return Results.NotFound();
-
+                await service.ExcluirAsync(id);
                 return Results.NoContent();
             }
             catch (Exception ex)
