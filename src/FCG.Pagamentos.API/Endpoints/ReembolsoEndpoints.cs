@@ -1,5 +1,6 @@
 using FCG.Pagamentos.Application.Pagamentos.Interfaces;
 using FCG.Pagamentos.Application.Pagamentos.ViewModels;
+using FCG.Pagamentos.Domain.Pagamentos.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -115,7 +116,10 @@ public static class ReembolsoEndpoints
                 if (string.IsNullOrWhiteSpace(novoStatus))
                     return Results.BadRequest("Status é obrigatório");
 
-                var reembolso = await service.AtualizarStatusAsync(id, novoStatus);
+                if (!Enum.TryParse<StatusReembolso>(novoStatus, true, out var statusEnum))
+                    return Results.BadRequest("Status inválido");
+
+                var reembolso = await service.AtualizarStatusAsync(id, statusEnum);
                 return Results.Ok(reembolso);
             }
             catch (InvalidOperationException ex)
@@ -135,10 +139,7 @@ public static class ReembolsoEndpoints
         {
             try
             {
-                var resultado = await service.CancelarReembolsoAsync(id);
-                if (!resultado)
-                    return Results.NotFound();
-
+                await service.CancelarReembolsoAsync(id);
                 return Results.NoContent();
             }
             catch (InvalidOperationException ex)
