@@ -1,6 +1,8 @@
 using FCG.Usuarios.API.Endpoints;
 using FCG.Usuarios.Application.Usuarios.Interfaces;
 using FCG.Usuarios.Application.Usuarios.Services;
+using FCG.Usuarios.Domain.Usuarios.Interfaces;
+using FCG.Usuarios.Infrastructure.Usuarios.Repositories;
 using FCG.Usuarios.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -50,7 +52,9 @@ builder.Services.AddAuthorization(options =>
 });
 
 // Registro dos serviços
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
 
 var app = builder.Build();
 

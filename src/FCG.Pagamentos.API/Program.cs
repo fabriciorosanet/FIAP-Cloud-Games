@@ -3,6 +3,8 @@ using FCG.Pagamentos.Application.Pagamentos.Interfaces;
 using FCG.Pagamentos.Application.Pagamentos.Services;
 using FCG.Pagamentos.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using FCG.Pagamentos.Domain.Pagamentos.Interfaces;
+using FCG.Pagamentos.Infrastructure.Pagamentos.Repositories;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,8 @@ builder.Services.AddDbContext<PagamentosDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Registro dos serviços
+builder.Services.AddScoped<ITransacaoRepository, TransacaoRepository>();
+builder.Services.AddScoped<IReembolsoRepository, ReembolsoRepository>();
 builder.Services.AddScoped<ITransacaoService, TransacaoService>();
 builder.Services.AddScoped<IReembolsoService, ReembolsoService>();
 
