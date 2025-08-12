@@ -25,17 +25,20 @@ dotnet restore
 ### 🛠️ Aplicando Migrations e Criando o Banco
 
 🔄 Pagamentos
-bash
+```bash
 dotnet ef migrations add Initial --project src/FCG.Pagamentos.Infrastructure --context PagamentosDbContext
 dotnet ef database update --project src/FCG.Pagamentos.Infrastructure --context PagamentosDbContext
+```
 🔄 Usuarios
-bash
+```bash
 dotnet ef migrations add Initial --project src/FCG.Usuarios.Infrastructure --context UsuariosDbContext
 dotnet ef database update --project src/FCG.Usuarios.Infrastructure --context UsuariosDbContext
+```
 🔄 Jogos
-bash
+```bash
 dotnet ef migrations add Initial --project src/FCG.Jogos.Infrastructure --context JogosDbContext
 dotnet ef database update --project src/FCG.Jogos.Infrastructure --context JogosDbC
+```
 
 Para aplicar as migrations e criar o banco de dados, acesse a pasta raiz do projeto FCG.Infrastructure:
 
